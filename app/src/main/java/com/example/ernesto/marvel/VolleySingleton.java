@@ -3,7 +3,7 @@
  */
 
 
-package com.example.ernesto.marvel.pojo;
+package com.example.ernesto.marvel;
 
 import android.content.Context;
 

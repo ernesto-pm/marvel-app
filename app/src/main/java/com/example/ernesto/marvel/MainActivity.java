@@ -1,15 +1,14 @@
 package com.example.ernesto.marvel;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,19 +16,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.ernesto.marvel.adapters.ItuneArrayAdapter;
-import com.example.ernesto.marvel.pojo.Itune;
-import com.example.ernesto.marvel.pojo.VolleySingleton;
+import com.example.ernesto.marvel.adapters.MarvelAdapter;
+import com.example.ernesto.marvel.pojo.MarvelDude;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -39,6 +34,7 @@ public class MainActivity extends Activity {
     private ListView listView;
     private ArrayAdapter<String> arrayAdapter;
     private ItuneArrayAdapter ituneArrayAdapter;
+    private MarvelAdapter marvelAdapter;
 
     private RequestQueue mQueue;
 
@@ -54,18 +50,30 @@ public class MainActivity extends Activity {
 
         offset = "0";
         limit = "100";
+
         /*
         ituneArrayAdapter = new ItuneArrayAdapter(this,
-                R.layout.itunes_layout, new ArrayList<Itune>());
+                R.layout.marvel_layout, new ArrayList<Itune>());
         listView.setAdapter(ituneArrayAdapter);
 
         new ProcesaJson(ituneArrayAdapter).execute("https://itunes.apple.com/search?term=la+banda+machos");
         */
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
-        listView.setAdapter(adapter);
+
+
+
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
+        //listView.setAdapter(adapter);
+        //mQueue = VolleySingleton.getInstance(this).getRequestQueue();
+        //jsonMarvel(getMarvelString(), adapter);
+
+        marvelAdapter = new MarvelAdapter(this, R.layout.marvel_layout, new ArrayList<MarvelDude>());
+        listView.setAdapter(marvelAdapter);
         mQueue = VolleySingleton.getInstance(this).getRequestQueue();
-        jsonMarvel(getMarvelString(), adapter);
+        jsonMarvel(getMarvelString(), marvelAdapter);
+
+
+
         //new MarvelJson(adapter).execute();
 
     }
@@ -83,10 +91,10 @@ public class MainActivity extends Activity {
         offset = off + "";
         //limit = lim + "";
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
-        listView.setAdapter(adapter);
+        marvelAdapter = new MarvelAdapter(this, R.layout.marvel_layout, new ArrayList<MarvelDude>());
+        listView.setAdapter(marvelAdapter);
         mQueue = VolleySingleton.getInstance(this).getRequestQueue();
-        jsonMarvel(getMarvelString(), adapter);
+        jsonMarvel(getMarvelString(), marvelAdapter);
     }
 
     public void reduceOffset(View view) {
@@ -102,14 +110,25 @@ public class MainActivity extends Activity {
         offset = off + "";
         //limit = lim + "";
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
-        listView.setAdapter(adapter);
+        marvelAdapter = new MarvelAdapter(this, R.layout.marvel_layout, new ArrayList<MarvelDude>());
+        listView.setAdapter(marvelAdapter);
         mQueue = VolleySingleton.getInstance(this).getRequestQueue();
-        jsonMarvel(getMarvelString(), adapter);
+        jsonMarvel(getMarvelString(), marvelAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                MarvelDude marvelDude = marvelAdapter.getItem(i);
+                Log.i("Algo", marvelDude.id);
+                Toast.makeText(getApplicationContext(), marvelDude.id, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    private void jsonMarvel(String url, final ArrayAdapter<String> adapter) {
 
+    //private void jsonMarvel(String url, final MarvelAdapter<String> adapter) {
+    private void jsonMarvel(String url, final MarvelAdapter adapter) {
         adapter.clear();
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
@@ -124,7 +143,21 @@ public class MainActivity extends Activity {
                             JSONArray jsonArray = data.getJSONArray("results");
                             for(int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                adapter.add(jsonObject.getString("name"));
+                                JSONObject thumbnail = jsonObject.getJSONObject("thumbnail");
+
+                                StringBuffer imageUrl =  new StringBuffer();
+                                imageUrl.append(thumbnail.getString("path"));
+                                imageUrl.append("/portrait_small");
+                                imageUrl.append(".");
+                                imageUrl.append(thumbnail.getString("extension"));
+
+                                MarvelDude marveldude = new MarvelDude();
+                                marveldude.name = jsonObject.getString("name");
+                                marveldude.url = imageUrl.toString();
+                                marveldude.id = jsonObject.getLong("id") + "";
+
+                                //adapter.add(jsonObject.getString("name"));
+                                adapter.add(marveldude);
                             }
                             adapter.notifyDataSetChanged();
 

@@ -32,16 +32,16 @@ public class ItuneArrayAdapter extends ArrayAdapter<Itune> {
         Itune itune = arrayList.get(position);
         //Itune itune1  = getItem(position);
         if(convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.itunes_layout, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.marvel_layout, parent, false);
         }
 
         TextView collectionName = (TextView) convertView.findViewById(R.id.collection);
-        TextView trackName      = (TextView) convertView.findViewById(R.id.trackName);
-        TextView trackPrice     = (TextView) convertView.findViewById(R.id.trackPrice);
+        //TextView trackName      = (TextView) convertView.findViewById(R.id.trackName);
+        //TextView trackPrice     = (TextView) convertView.findViewById(R.id.trackPrice);
 
         collectionName.setText(itune.collectionName);
-        trackName.setText(itune.trackName);
-        trackPrice.setText(itune.trackPrice+"");
+        //trackName.setText(itune.trackName);
+        //trackPrice.setText(itune.trackPrice+"");
 
         return convertView;
     }
