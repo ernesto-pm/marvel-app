@@ -1,6 +1,7 @@
 package com.example.ernesto.marvel;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -72,6 +73,21 @@ public class MainActivity extends Activity {
         mQueue = VolleySingleton.getInstance(this).getRequestQueue();
         jsonMarvel(getMarvelString(), marvelAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                MarvelDude marvelDude = marvelAdapter.getItem(i);
+                //Log.i("Algo", marvelDude.id);
+                //Toast.makeText(getApplicationContext(), marvelDude.id, Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(MainActivity.this, DudeDetail.class);
+                intent.putExtra("MarvelDude", marvelDude);
+                startActivity(intent);
+                finish();
+            }
+        });
+
 
 
         //new MarvelJson(adapter).execute();
@@ -115,19 +131,11 @@ public class MainActivity extends Activity {
         mQueue = VolleySingleton.getInstance(this).getRequestQueue();
         jsonMarvel(getMarvelString(), marvelAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                MarvelDude marvelDude = marvelAdapter.getItem(i);
-                Log.i("Algo", marvelDude.id);
-                Toast.makeText(getApplicationContext(), marvelDude.id, Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
 
-    //private void jsonMarvel(String url, final MarvelAdapter<String> adapter) {
+
     private void jsonMarvel(String url, final MarvelAdapter adapter) {
         adapter.clear();
 
@@ -141,6 +149,7 @@ public class MainActivity extends Activity {
 
                             JSONObject data = response.getJSONObject("data");
                             JSONArray jsonArray = data.getJSONArray("results");
+
                             for(int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 JSONObject thumbnail = jsonObject.getJSONObject("thumbnail");
@@ -155,6 +164,9 @@ public class MainActivity extends Activity {
                                 marveldude.name = jsonObject.getString("name");
                                 marveldude.url = imageUrl.toString();
                                 marveldude.id = jsonObject.getLong("id") + "";
+                                marveldude.description = jsonObject.getString("description");
+
+                                Log.i(marveldude.name,marveldude.description);
 
                                 //adapter.add(jsonObject.getString("name"));
                                 adapter.add(marveldude);
